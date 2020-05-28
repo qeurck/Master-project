@@ -1,0 +1,47 @@
+import xml.dom.minidom
+import pandas as pd
+
+
+
+#get a list of all files from a folder
+import os
+folder=input('Enter location of the folder with xml files(should end with backslash):\n')
+
+files=os.listdir(path=folder)
+#delete all the none xml files from the list
+for f in files:
+    if (f[-4:])!='.xml':
+        files.remove(f)       
+
+
+
+#create new directory for csv files
+if os.path.exists(folder+'csv'):
+    pass
+else:
+    os.mkdir(folder+'csv')
+
+
+
+#define function to transfer mz and i data from xml to csv
+#check your xml, and change the code accordingly, if there is other name in front of these two datasets
+def xmltocsv(mydoc):  
+    mz=[]
+    i=[]
+    peaks=mydoc.getElementsByTagName("pk")
+    for peaknr in peaks:
+        mz+=[float(peaknr.getAttribute("mz"))]
+        i+=[float(peaknr.getAttribute("i"))]
+    values=[mz,i]
+    dataframe=pd.DataFrame(values)
+    dataframe=dataframe.T
+    return dataframe
+ 
+#take all the files from a list and change them to csv, put them in another folder
+for f in files:
+    doc = xml.dom.minidom.parse(folder+f)
+    df=xmltocsv(doc) 
+    df.to_csv(folder+'\\csv\\'+f+'.csv',index=False,header=False)
+    
+#get list of converted csv files   
+csvfiles=os.listdir(path=folder+'csv')
